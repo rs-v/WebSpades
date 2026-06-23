@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BetterSpades Web</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    background: #000;
+    overflow: hidden;
+    width: 100vw;
+    height: 100vh;
+}
+canvas {
+    display: block;
+    width: 100vw;
+    height: 100vh;
+    image-rendering: pixelated;
+}
+#loading {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #fff;
+    font-family: monospace;
+    font-size: 18px;
+    text-align: center;
+}
+#loading .spinner {
+    border: 4px solid #333;
+    border-top: 4px solid #fff;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+    margin: 16px auto;
+}
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+#progress-bar {
+    width: 300px;
+    height: 8px;
+    background: #333;
+    margin: 12px auto;
+    border-radius: 4px;
+    overflow: hidden;
+}
+#progress-fill {
+    width: 0%;
+    height: 100%;
+    background: #4a4;
+    transition: width 0.2s;
+}
+#output {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    color: #888;
+    font-family: monospace;
+    font-size: 11px;
+    max-height: 120px;
+    overflow-y: auto;
+    padding: 4px 8px;
+    pointer-events: none;
+}
+</style>
+</head>
+<body>
+<div id="loading">
+    <div class="spinner"></div>
+    <div>Loading BetterSpades...</div>
+    <div id="progress-bar"><div id="progress-fill"></div></div>
+    <div id="load-status">Downloading assets...</div>
+</div>
+<canvas id="canvas" oncontextmenu="event.preventDefault()" tabindex="-1"></canvas>
+<div id="output"></div>
+
+<script>
+var statusEl = document.getElementById('load-status');
+var progressFill = document.getElementById('progress-fill');
+var loadingEl = document.getElementById('loading');
+
+var Module = {
+    preRun: [],
+    postRun: [function() {
+        loadingEl.style.display = 'none';
+    }],
+    print: function(text) {
+        console.log(text);
+        var el = document.getElementById('output');
+        if (el) {
+            el.innerHTML += text + '\n';
+            el.scrollTop = el.scrollHeight;
+        }
+    },
+    printErr: function(text) {
+        console.error(text);
+        var el = document.getElementById('output');
+        if (el) {
+            el.innerHTML += '<span style="color:#f66">' + text + '</span>\n';
+            el.scrollTop = el.scrollHeight;
+        }
+    },
+    canvas: (function() {
+        var canvas = document.getElementById('canvas');
+        canvas.addEventListener('webglcontextlost', function(e) {
+            alert('WebGL context lost. Please reload the page.');
+            e.preventDefault();
+        }, false);
+        return canvas;
+    })(),
+    setStatus: function(text) {
+        if (!Module.setStatus.last) Module.setStatus.last = { time: Date.now(), text: '' };
+        if (text === Module.setStatus.last.text) return;
+        if (text) {
+            var m = text.match(/([^(]+)\((\d+(\.\d+)?)\/(\d+)\)/);
+            if (m) {
+                var pct = (parseInt(m[2]) / parseInt(m[4])) * 100;
+                progressFill.style.width = pct + '%';
+                statusEl.textContent = 'Downloading data... ' + Math.round(pct) + '%';
+            } else {
+                statusEl.textContent = text;
+            }
+        }
+        Module.setStatus.last = { time: Date.now(), text: text };
+    },
+    totalDependencies: 0,
+    monitorRunDependencies: function(left) {
+        this.totalDependencies = Math.max(this.totalDependencies, left);
+        Module.setStatus(left ? 'Preparing... (' + (this.totalDependencies - left) + '/' + this.totalDependencies + ')' : '');
+    }
+};
+
+Module.setStatus('Downloading...');
+window.onerror = function() {
+    Module.setStatus('Exception thrown, see JavaScript console');
+    loadingEl.querySelector('.spinner').style.display = 'none';
+    Module.setStatus = function(text) {
+        if (text) console.error('[post-exception status] ' + text);
+    };
+};
+</script>
+{{{ SCRIPT }}}
+</body>
+</html>

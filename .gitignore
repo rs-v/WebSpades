@@ -1,0 +1,16 @@
+Thumbs.db
+.DS_Store
+Desktop.ini
+/nongithub
+/dist
+/build/*/
+/build-wasm/
+/cache/
+*.lib
+*.a
+*.o
+*.vxl
+*.exe
+*.zip
+*.kv6
+*.dll
