@@ -32,13 +32,12 @@ jobs:
 
       - name: Configure CMake
         run: |
-          cd BetterSpades
           mkdir -p build-wasm && cd build-wasm
           emcmake cmake -DCMAKE_BUILD_TYPE=Release ..
 
       - name: Build
         run: |
-          cd BetterSpades/build-wasm
+          cd build-wasm
           cmake --build . --target client -j$(nproc)
 
       - name: Upload WASM artifact
@@ -46,16 +45,16 @@ jobs:
         with:
           name: BetterSpades-wasm
           path: |
-            BetterSpades/build-wasm/BetterSpades/client.html
-            BetterSpades/build-wasm/BetterSpades/client.js
-            BetterSpades/build-wasm/BetterSpades/client.wasm
-            BetterSpades/build-wasm/BetterSpades/client.data
+            build-wasm/BetterSpades/client.html
+            build-wasm/BetterSpades/client.js
+            build-wasm/BetterSpades/client.wasm
+            build-wasm/BetterSpades/client.data
 
       - name: Upload Pages artifact
         if: github.event_name == 'push'
         uses: actions/upload-pages-artifact@v3
         with:
-          path: BetterSpades/build-wasm/BetterSpades
+          path: build-wasm/BetterSpades
 
   deploy:
     name: Deploy to GitHub Pages
