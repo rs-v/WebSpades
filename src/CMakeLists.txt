@@ -73,7 +73,7 @@ download_file_if_it_doesnt_exist(log.c https://raw.githubusercontent.com/xtreme8
 download_file_if_it_doesnt_exist(hashtable.c https://raw.githubusercontent.com/goldsborough/hashtable/master/hashtable.c)
 download_file_if_it_doesnt_exist(hashtable.h https://raw.githubusercontent.com/goldsborough/hashtable/master/hashtable.h)
 download_file_if_it_doesnt_exist(../deps/libdeflate.h https://raw.githubusercontent.com/ebiggers/libdeflate/master/libdeflate.h)
-download_optional_file(../bsresources.zip http://aos.party/bsresources.zip)
+download_optional_file(../bsresources.zip https://aos.party/bsresources.zip)
 download_file_if_it_doesnt_exist(microui.c https://raw.githubusercontent.com/rxi/microui/master/src/microui.c)
 download_file_if_it_doesnt_exist(microui.h https://raw.githubusercontent.com/rxi/microui/master/src/microui.h)
 
@@ -197,7 +197,7 @@ if(EMSCRIPTEN)
 		-sEXPORTED_RUNTIME_METHODS=['ccall','cwrap']
 		-lidbfs.js
 	)
-	target_link_libraries(client ${CMAKE_CURRENT_BINARY_DIR}/../_deps/deflate_proj-build/libdeflate.a cglm vxl)
+	target_link_libraries(client libdeflate_static cglm vxl)
 	target_include_directories(client PRIVATE ${BetterSpades_SOURCE_DIR}/deps)
 	set_target_properties(client PROPERTIES
 		RUNTIME_OUTPUT_DIRECTORY ${BetterSpades_SOURCE_DIR}/build-wasm/BetterSpades
