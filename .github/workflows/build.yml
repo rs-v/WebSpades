@@ -50,6 +50,22 @@ jobs:
             build-wasm/BetterSpades/client.wasm
             build-wasm/BetterSpades/client.data
 
+      - name: Create index.html redirect
+        if: github.event_name == 'push'
+        run: |
+          cat > build-wasm/BetterSpades/index.html << 'EOF'
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <meta http-equiv="refresh" content="0;url=client.html">
+            <title>BetterSpades</title>
+          </head>
+          <body>
+            <p>Redirecting to <a href="client.html">client.html</a>...</p>
+          </body>
+          </html>
+          EOF
+
       - name: Upload Pages artifact
         if: github.event_name == 'push'
         uses: actions/upload-pages-artifact@v3
