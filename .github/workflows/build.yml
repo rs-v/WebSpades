@@ -1,0 +1,94 @@
+name: Build BetterSpades
+
+on:
+  push:
+    branches: [ main, master, standalone ]
+  pull_request:
+    branches: [ main, master, standalone ]
+  workflow_dispatch:
+
+jobs:
+  build-wasm:
+    name: WebAssembly (Emscripten)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Emscripten
+        uses: mymindstorm/setup-emsdk@v14
+        with:
+          version: latest
+
+      - name: Configure CMake
+        run: |
+          mkdir -p build-wasm && cd build-wasm
+          emcmake cmake -DCMAKE_BUILD_TYPE=Release ..
+
+      - name: Build
+        run: |
+          cd build-wasm
+          cmake --build . --target client -j$(nproc)
+
+      - name: Upload WASM artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: BetterSpades-wasm
+          path: |
+            BetterSpades/build-wasm/BetterSpades/client.html
+            BetterSpades/build-wasm/BetterSpades/client.js
+            BetterSpades/build-wasm/BetterSpades/client.wasm
+            BetterSpades/build-wasm/BetterSpades/client.data
+
+  build-linux:
+    name: Native Linux
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            cmake build-essential \
+            libgl1-mesa libgl1-mesa-dev \
+            libopenal1 libopenal-dev \
+            libglfw3 libglfw3-dev \
+            libenet-dev libglew-dev \
+            git
+
+      - name: Build libdeflate
+        run: |
+          cd /tmp
+          git clone https://github.com/ebiggers/libdeflate.git
+          cd libdeflate
+          cmake -DCMAKE_BUILD_TYPE=Release .
+          make -j$(nproc)
+          mkdir -p $GITHUB_WORKSPACE/BetterSpades/deps
+          cp libdeflate.a $GITHUB_WORKSPACE/BetterSpades/deps/
+
+      - name: Configure CMake
+        run: |
+          cd BetterSpades
+          mkdir -p build && cd build
+          cmake -DCMAKE_BUILD_TYPE=Release ..
+
+      - name: Build
+        run: |
+          cd BetterSpades/build
+          make -j$(nproc)
+
+      - name: Upload Linux artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: BetterSpades-linux
+          path: |
+            BetterSpades/build/BetterSpades/client
+            BetterSpades/build/BetterSpades/config.ini
+            BetterSpades/build/BetterSpades/fonts/
+            BetterSpades/build/BetterSpades/kv6/
+            BetterSpades/build/BetterSpades/png/
+            BetterSpades/build/BetterSpades/wav/
