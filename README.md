@@ -200,7 +200,7 @@ python3 -m http.server 8000
 # Open http://localhost:8000/client.html
 ```
 
-The WASM build connects to servers via WebSocket. Use [piqueserver](https://github.com/piqueserver/piqueserver) with WebSocket support enabled (port 32888) as the game server.
+The WASM build connects to servers via WebSocket. Use [piqueserver](https://github.com/rs-v/piqueserver) with WebSocket support enabled (port 32888) as the game server.
 
 **Key Emscripten adaptations:**
 - Uses `LEGACY_GL_EMULATION` and `GL_TRIANGLES` (WebGL does not support `GL_QUADS`)
